@@ -1,10 +1,12 @@
 $ErrorActionPreference = "Stop"
 
-function Ensure-Administrator {
-    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($identity)
+function Test-IsElevated {
+    $null = & fltmc.exe 2>$null
+    return ($LASTEXITCODE -eq 0)
+}
 
-    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+function Ensure-Administrator {
+    if (-not (Test-IsElevated)) {
         Start-Process powershell.exe -Verb RunAs -ArgumentList "-ExecutionPolicy Bypass -NoProfile -File `"$PSCommandPath`""
         exit 0
     }
@@ -63,6 +65,11 @@ function Apply-SystemTweaks {
 
     Add-Status -OutputBox $OutputBox -Message "Bruker systemtweaks."
 
+    if (-not (Test-IsElevated)) {
+        Add-Status -OutputBox $OutputBox -Message "Wizard-en er ikke kjort som administrator. Hopper over systemtweaks som krever forhoying."
+        return
+    }
+
     powercfg /S SCHEME_MIN | Out-Null
 
     if ($LowLatency) {
@@ -111,6 +118,21 @@ function Install-WingetPackages {
         else {
             Add-Status -OutputBox $OutputBox -Message "$packageId kunne ikke installeres automatisk."
         }
+    }
+}
+
+function Invoke-Step {
+    param(
+        [Parameter(Mandatory = $true)][scriptblock]$Action,
+        [Parameter(Mandatory = $true)][System.Windows.Controls.TextBox]$OutputBox,
+        [Parameter(Mandatory = $true)][string]$StepName
+    )
+
+    try {
+        & $Action
+    }
+    catch {
+        Add-Status -OutputBox $OutputBox -Message "$StepName feilet: $($_.Exception.Message)"
     }
 }
 
@@ -323,11 +345,21 @@ $applyButton.Add_Click({
         $selectedProfile = $profiles[(Get-SelectedProfileKey)]
         Add-Status -OutputBox $outputBox -Message "Starter bygging av loadout: $($selectedProfile.Title)"
 
-        Apply-UserTweaks -OutputBox $outputBox
-        Apply-SystemTweaks -OutputBox $outputBox -LowLatency ([bool]$lowLatencyCheck.IsChecked) -Privacy ([bool]$privacyCheck.IsChecked) -RgbLook ([bool]$rgbLookCheck.IsChecked)
+        if (-not (Test-IsElevated)) {
+            Add-Status -OutputBox $outputBox -Message "Mangler administratorrettigheter. Godkjenn UAC-prompten hvis den vises, eller start scriptet manuelt som administrator."
+        }
+
+        Invoke-Step -OutputBox $outputBox -StepName "Brukertweaks" -Action {
+            Apply-UserTweaks -OutputBox $outputBox
+        }
+        Invoke-Step -OutputBox $outputBox -StepName "Systemtweaks" -Action {
+            Apply-SystemTweaks -OutputBox $outputBox -LowLatency ([bool]$lowLatencyCheck.IsChecked) -Privacy ([bool]$privacyCheck.IsChecked) -RgbLook ([bool]$rgbLookCheck.IsChecked)
+        }
 
         if ([bool]$installPackagesCheck.IsChecked) {
-            Install-WingetPackages -PackageIds $selectedProfile.Packages -OutputBox $outputBox
+            Invoke-Step -OutputBox $outputBox -StepName "Appinstallasjon" -Action {
+                Install-WingetPackages -PackageIds $selectedProfile.Packages -OutputBox $outputBox
+            }
         }
         else {
             Add-Status -OutputBox $outputBox -Message "Appinstallasjon ble hoppet over."
