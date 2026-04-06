@@ -152,8 +152,11 @@ function Remove-ProvisionedApps {
     )
 
     $removePatterns = @(
+        "Clipchamp.Clipchamp",
         "Microsoft.BingNews",
         "Microsoft.BingWeather",
+        "Microsoft.Copilot",
+        "Microsoft.DevHome",
         "Microsoft.GetHelp",
         "Microsoft.Getstarted",
         "Microsoft.Microsoft3DViewer",
@@ -163,12 +166,14 @@ function Remove-ProvisionedApps {
         "Microsoft.MixedReality.Portal",
         "Microsoft.People",
         "Microsoft.PowerAutomateDesktop",
+        "Microsoft.OutlookForWindows",
         "Microsoft.Todos",
         "Microsoft.WindowsAlarms",
         "Microsoft.WindowsFeedbackHub",
         "Microsoft.WindowsMaps",
         "Microsoft.WindowsSoundRecorder",
         "Microsoft.YourPhone",
+        "MicrosoftTeams",
         "Microsoft.ZuneMusic",
         "Microsoft.ZuneVideo"
     )

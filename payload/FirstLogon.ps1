@@ -53,6 +53,107 @@ function Apply-UserTweaks {
     Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarDa" -Value 0
     Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value 0
     Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" -Name "SearchboxTaskbarMode" -Value 0
+    Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAl" -Value 0
+    Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0
+    Set-RegistryValue -Path "HKCU:\Control Panel\Desktop\WindowMetrics" -Name "MinAnimate" -Value "0" -Type ([Microsoft.Win32.RegistryValueKind]::String)
+}
+
+function Apply-VisualPerformanceMode {
+    param([System.Windows.Controls.TextBox]$OutputBox)
+
+    Add-Status -OutputBox $OutputBox -Message "Bruker visual-performance preset."
+
+    Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2
+    Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Value 0
+    Set-RegistryValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0
+    Set-RegistryValue -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Value "0" -Type ([Microsoft.Win32.RegistryValueKind]::String)
+    Set-RegistryValue -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x90,0x12,0x03,0x80,0x10,0x00,0x00,0x00)) -Type ([Microsoft.Win32.RegistryValueKind]::Binary)
+}
+
+function Remove-CurrentUserApps {
+    param(
+        [string[]]$Patterns,
+        [System.Windows.Controls.TextBox]$OutputBox
+    )
+
+    if (-not $Patterns -or $Patterns.Count -eq 0) {
+        return
+    }
+
+    Add-Status -OutputBox $OutputBox -Message "Rydder bort unodvendige bruker-apper."
+
+    $packages = Get-AppxPackage
+    foreach ($pattern in $Patterns) {
+        $matches = $packages | Where-Object { $_.Name -like $pattern }
+        foreach ($pkg in $matches) {
+            try {
+                Remove-AppxPackage -Package $pkg.PackageFullName | Out-Null
+                Add-Status -OutputBox $OutputBox -Message "Fjernet $($pkg.Name)"
+            }
+            catch {
+                Add-Status -OutputBox $OutputBox -Message "Kunne ikke fjerne $($pkg.Name)"
+            }
+        }
+    }
+}
+
+function Remove-StartupNoise {
+    param([System.Windows.Controls.TextBox]$OutputBox)
+
+    Add-Status -OutputBox $OutputBox -Message "Fjerner vanlig oppstartsstoy."
+
+    $runPaths = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run",
+        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+    )
+
+    $runNames = @(
+        "OneDrive",
+        "Teams",
+        "Microsoft Teams",
+        "Copilot",
+        "Edge",
+        "MicrosoftEdgeAutoLaunch_*"
+    )
+
+    foreach ($path in $runPaths) {
+        if (-not (Test-Path -LiteralPath $path)) {
+            continue
+        }
+
+        foreach ($prop in (Get-ItemProperty -LiteralPath $path).PSObject.Properties) {
+            foreach ($namePattern in $runNames) {
+                if ($prop.Name -like $namePattern) {
+                    Remove-ItemProperty -LiteralPath $path -Name $prop.Name -ErrorAction SilentlyContinue
+                    Add-Status -OutputBox $OutputBox -Message "Deaktiverte autostart: $($prop.Name)"
+                    break
+                }
+            }
+        }
+    }
+}
+
+function Apply-ProfileActions {
+    param(
+        [hashtable]$Profile,
+        [System.Windows.Controls.TextBox]$OutputBox
+    )
+
+    Invoke-Step -OutputBox $OutputBox -StepName "Bloat cleanup" -Action {
+        Remove-CurrentUserApps -Patterns $Profile.RemoveUserApps -OutputBox $OutputBox
+    }
+
+    if ($Profile.DisableStartupNoise) {
+        Invoke-Step -OutputBox $OutputBox -StepName "Oppstartsopprydding" -Action {
+            Remove-StartupNoise -OutputBox $OutputBox
+        }
+    }
+
+    if ($Profile.ReduceVisualEffects) {
+        Invoke-Step -OutputBox $OutputBox -StepName "Visual performance" -Action {
+            Apply-VisualPerformanceMode -OutputBox $OutputBox
+        }
+    }
 }
 
 function Apply-SystemTweaks {
@@ -150,6 +251,21 @@ $profiles = @{
         LowLatency = $true
         Privacy = $true
         RgbLook = $false
+        DisableStartupNoise = $true
+        ReduceVisualEffects = $true
+        RemoveUserApps = @(
+            "Clipchamp.Clipchamp*",
+            "Microsoft.GetHelp*",
+            "Microsoft.Getstarted*",
+            "Microsoft.MicrosoftOfficeHub*",
+            "Microsoft.MicrosoftSolitaireCollection*",
+            "Microsoft.PowerAutomateDesktop*",
+            "Microsoft.WindowsFeedbackHub*",
+            "Microsoft.YourPhone*",
+            "Microsoft.ZuneMusic*",
+            "Microsoft.ZuneVideo*",
+            "MicrosoftTeams*"
+        )
     }
     FiveM = @{
         Title = "FiveM"
@@ -158,6 +274,19 @@ $profiles = @{
         LowLatency = $true
         Privacy = $true
         RgbLook = $true
+        DisableStartupNoise = $true
+        ReduceVisualEffects = $true
+        RemoveUserApps = @(
+            "Clipchamp.Clipchamp*",
+            "Microsoft.GetHelp*",
+            "Microsoft.Getstarted*",
+            "Microsoft.MicrosoftOfficeHub*",
+            "Microsoft.MicrosoftSolitaireCollection*",
+            "Microsoft.PowerAutomateDesktop*",
+            "Microsoft.WindowsFeedbackHub*",
+            "Microsoft.YourPhone*",
+            "MicrosoftTeams*"
+        )
     }
     Streamer = @{
         Title = "Streamer"
@@ -166,6 +295,22 @@ $profiles = @{
         LowLatency = $false
         Privacy = $true
         RgbLook = $true
+        DisableStartupNoise = $true
+        ReduceVisualEffects = $true
+        RemoveUserApps = @(
+            "Clipchamp.Clipchamp*",
+            "Microsoft.GetHelp*",
+            "Microsoft.Getstarted*",
+            "Microsoft.MicrosoftOfficeHub*",
+            "Microsoft.MicrosoftSolitaireCollection*",
+            "Microsoft.PowerAutomateDesktop*",
+            "Microsoft.WindowsFeedbackHub*",
+            "Microsoft.YourPhone*",
+            "Microsoft.ZuneMusic*",
+            "Microsoft.ZuneVideo*",
+            "MicrosoftTeams*",
+            "Microsoft.OutlookForWindows*"
+        )
     }
     Creator = @{
         Title = "Creator"
@@ -174,6 +319,12 @@ $profiles = @{
         LowLatency = $false
         Privacy = $false
         RgbLook = $true
+        DisableStartupNoise = $false
+        ReduceVisualEffects = $false
+        RemoveUserApps = @(
+            "Microsoft.MicrosoftSolitaireCollection*",
+            "Microsoft.WindowsFeedbackHub*"
+        )
     }
 }
 
@@ -351,6 +502,9 @@ $applyButton.Add_Click({
 
         Invoke-Step -OutputBox $outputBox -StepName "Brukertweaks" -Action {
             Apply-UserTweaks -OutputBox $outputBox
+        }
+        Invoke-Step -OutputBox $outputBox -StepName "Profiltilpasning" -Action {
+            Apply-ProfileActions -Profile $selectedProfile -OutputBox $outputBox
         }
         Invoke-Step -OutputBox $outputBox -StepName "Systemtweaks" -Action {
             Apply-SystemTweaks -OutputBox $outputBox -LowLatency ([bool]$lowLatencyCheck.IsChecked) -Privacy ([bool]$privacyCheck.IsChecked) -RgbLook ([bool]$rgbLookCheck.IsChecked)
