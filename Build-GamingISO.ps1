@@ -5,14 +5,29 @@ param(
 
     [int]$EditionIndex,
 
-    [string]$WorkingRoot = (Join-Path $PSScriptRoot "work"),
+    [string]$WorkingRoot,
 
-    [string]$OutputRoot = (Join-Path $PSScriptRoot "output"),
+    [string]$OutputRoot,
 
     [string]$IsoName = "Win11-GamingLab.iso"
 )
 
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+    $scriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path -Parent
+}
+else {
+    $scriptRoot = $PSScriptRoot
+}
+
+if ([string]::IsNullOrWhiteSpace($WorkingRoot)) {
+    $WorkingRoot = Join-Path $scriptRoot "work"
+}
+
+if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+    $OutputRoot = Join-Path $scriptRoot "output"
+}
 
 function Write-Step {
     param([string]$Message)
@@ -280,7 +295,7 @@ if (-not (Test-Path -LiteralPath $IsoPath)) {
 }
 
 $resolvedIso = (Resolve-Path -LiteralPath $IsoPath).Path
-$scriptPayloadDir = Join-Path $PSScriptRoot "payload"
+$scriptPayloadDir = Join-Path $scriptRoot "payload"
 $isoRoot = Join-Path $OutputRoot "iso-root"
 $mountDir = Join-Path $WorkingRoot "mount"
 
