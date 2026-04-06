@@ -1,0 +1,35 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#081019"/>
+  <rect x="32" y="32" width="1216" height="656" rx="28" fill="#0C1522" stroke="#1CE0B6" stroke-width="2"/>
+  <rect x="64" y="64" width="1152" height="120" rx="24" fill="#101B2C"/>
+  <text x="96" y="116" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="700">Windows 11 Gaming Loadout</text>
+  <text x="96" y="152" fill="#8EA6C9" font-family="Segoe UI, Arial, sans-serif" font-size="18">Curated post-install wizard for gaming-focused Windows builds</text>
+  <rect x="945" y="88" width="231" height="72" rx="18" fill="#152236" stroke="#3CFFCC"/>
+  <text x="970" y="118" fill="#8EA6C9" font-family="Segoe UI, Arial, sans-serif" font-size="12">STATUS</text>
+  <text x="970" y="143" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">Fresh Install Wizard</text>
+  <rect x="64" y="216" width="690" height="408" rx="24" fill="#0F1826"/>
+  <text x="96" y="260" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">Choose your loadout</text>
+  <rect x="96" y="292" width="290" height="122" rx="22" fill="#111B2D" stroke="#29405D"/>
+  <text x="122" y="338" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Competitive</text>
+  <text x="122" y="370" fill="#8EA6C9" font-family="Segoe UI, Arial, sans-serif" font-size="16">FPS first. Lower background noise.</text>
+  <rect x="410" y="292" width="290" height="122" rx="22" fill="#171731" stroke="#4A36FF"/>
+  <text x="436" y="338" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">FiveM</text>
+  <text x="436" y="370" fill="#B2ACFF" font-family="Segoe UI, Arial, sans-serif" font-size="16">Roleplay setup with cyber styling.</text>
+  <rect x="96" y="438" width="290" height="122" rx="22" fill="#13201D" stroke="#23D18B"/>
+  <text x="122" y="484" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Streamer</text>
+  <text x="122" y="516" fill="#9BD7BD" font-family="Segoe UI, Arial, sans-serif" font-size="16">Gaming plus OBS-style flow.</text>
+  <rect x="410" y="438" width="290" height="122" rx="22" fill="#241812" stroke="#FF8A3D"/>
+  <text x="436" y="484" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Creator</text>
+  <text x="436" y="516" fill="#F2B487" font-family="Segoe UI, Arial, sans-serif" font-size="16">Balanced gaming, coding, media.</text>
+  <rect x="786" y="216" width="430" height="408" rx="24" fill="#0F1826"/>
+  <text x="818" y="260" fill="#F2F7FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">Activity</text>
+  <rect x="818" y="286" width="366" height="306" rx="18" fill="#081018"/>
+  <text x="840" y="330" fill="#D7E8FF" font-family="Consolas, monospace" font-size="18">[15:01:12] Profile selected: FiveM</text>
+  <text x="840" y="366" fill="#D7E8FF" font-family="Consolas, monospace" font-size="18">[15:01:14] Applying user tweaks</text>
+  <text x="840" y="402" fill="#D7E8FF" font-family="Consolas, monospace" font-size="18">[15:01:18] Applying system tweaks</text>
+  <text x="840" y="438" fill="#D7E8FF" font-family="Consolas, monospace" font-size="18">[15:01:22] Installing Valve.Steam</text>
+  <text x="840" y="474" fill="#D7E8FF" font-family="Consolas, monospace" font-size="18">[15:01:40] Installing Discord.Discord</text>
+  <text x="840" y="510" fill="#D7E8FF" font-family="Consolas, monospace" font-size="18">[15:01:58] Loadout completed</text>
+  <rect x="900" y="640" width="220" height="42" rx="14" fill="#1CE0B6"/>
+  <text x="958" y="667" fill="#071117" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700">Build loadout</text>
+</svg>

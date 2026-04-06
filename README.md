@@ -1,70 +1,96 @@
 # Win11 Gaming Loadout
 
-Dette oppsettet lager en lokal, tilpasset Windows 11 "gaming build" fra en offisiell ISO uten å røre originalfilen.
+Win11 Gaming Loadout is a curated Windows 11 ISO builder for gaming-focused installs.
 
-Fokus:
+It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gaming-friendly defaults, and injects a first-login GUI wizard inspired by the "system loadout" idea.
 
-- fjerne en del forhåndsinstallerte apper
-- beholde Windows Update, Defender og Microsoft Store
-- aktivere gaming- og ytelsesvennlige standardvalg
-- legge inn en GUI-basert Gaming Loadout Wizard ved første innlogging
-- bygge en ny ISO hvis `oscdimg.exe` finnes
+![Wizard preview](docs/preview.svg)
 
-Dette er bevisst tryggere enn mange ekstremt stripped varianter. Målet er en rask og ren gaming-build, ikke en ødelagt build som mister oppdateringer eller drivere.
+## What it is
 
-## Loadout Wizard
+- A local Windows 11 ISO customization workflow
+- A safer alternative to ultra-stripped builds
+- A first-login WPF wizard with curated profiles
+- A gaming-focused setup flow for fresh installs
 
-Etter første innlogging starter en enkel GUI-wizard som er inspirert av "system loadout"-ideen:
+## What it is not
 
-- profiler: `Competitive`, `FiveM`, `Streamer`, `Creator`
-- predefinerte tweaks per profil
-- valgfri appinstallasjon med `winget`
-- cyber/gaming-look som ekstra preset
+- Not an activation bypass
+- Not a TPM or Secure Boot bypass
+- Not a "remove everything" image
+- Not a promise of lower latency through unsafe tweaks
 
-Wizard-en kjører lokalt via PowerShell + WPF og krever ingen ekstra GUI-rammeverk.
+## Current profiles
 
-## Krav
+- `Competitive`: cleaner desktop, lower background noise, FPS-first defaults
+- `FiveM`: roleplay-friendly setup with a cyber look and core gaming apps
+- `Streamer`: gaming plus OBS-style creator flow
+- `Creator`: balanced gaming, coding, and media setup
 
-- Windows Terminal / PowerShell kjørt som administrator
-- `DISM` er innebygd i Windows
-- `oscdimg.exe` er valgfri, men nødvendig for å bygge ny bootbar ISO
-  - følger vanligvis med Windows ADK
+## Included flow
 
-## Hva som gjøres
+1. Copy the ISO contents into a writable workspace
+2. Mount `install.wim`
+3. Remove selected provisioned apps
+4. Apply offline registry tweaks
+5. Inject `SetupComplete.cmd`
+6. Inject the first-login GUI wizard
+7. Write `autounattend.xml`
+8. Build a new ISO if `oscdimg.exe` is available
 
-- kopierer innholdet fra ISO til en arbeidsmappe
-- monterer `install.wim`
-- fjerner utvalgte provisioned apps
-- setter offline-registertweaks for mindre bakgrunnsstøy og mer gaming-fokus
-- legger inn `SetupComplete.cmd` og en GUI-basert `FirstLogon.ps1`
-- genererer `autounattend.xml`
-- bygger ny ISO hvis verktøy finnes
+## Safety goals
 
-## Hva som ikke gjøres
+- Keep Windows Update
+- Keep Microsoft Store
+- Keep Defender
+- Avoid extreme component removal
+- Keep the project understandable and editable
 
-- ingen aktiverings- eller lisensomgåelser
-- ingen TPM-/Secure Boot-bypass
-- ingen fjerning av Windows Update eller Defender
+## Requirements
 
-## Kjøring
+- PowerShell running as administrator
+- `DISM` available on the host machine
+- `oscdimg.exe` if you want a final bootable ISO from the script
 
-Eksempel:
+## Quick start
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-cd "C:\Users\Patri\Desktop\Fivem Scripts\OX Cyber skin\Storage Job\win11-gaming-build"
+cd "C:\Users\Patri\Desktop\win11-gaming-build"
 .\Build-GamingISO.ps1 -IsoPath "C:\Users\Patri\Downloads\Win11_25H2_Norwegian_x64_v2.iso"
 ```
 
-Første kjøring uten `-EditionIndex` vil bare vise tilgjengelige editions og stoppe. Kjør så på nytt med ønsket index:
+The first run lists available Windows editions. Then run it again with the edition index you want:
 
 ```powershell
 .\Build-GamingISO.ps1 -IsoPath "C:\Users\Patri\Downloads\Win11_25H2_Norwegian_x64_v2.iso" -EditionIndex 6
 ```
 
-Hvis `oscdimg.exe` ikke finnes, blir den ferdige ISO-strukturen liggende i `output\iso-root` og kan bygges senere.
-
 ## Output
 
-- ISO-struktur: `output\iso-root`
-- ferdig ISO: `output\Win11-GamingLab.iso` hvis `oscdimg.exe` er tilgjengelig
+- ISO tree: `output\iso-root`
+- Final ISO: `output\Win11-GamingLab.iso` when `oscdimg.exe` is present
+
+## Repo layout
+
+- `Build-GamingISO.ps1`: main builder
+- `payload/SetupComplete.cmd`: post-setup launcher
+- `payload/FirstLogon.ps1`: WPF loadout wizard
+- `docs/preview.svg`: visual repo preview
+- `CHANGELOG.md`: release history
+- `releases/RELEASE_TEMPLATE.md`: release notes template
+
+## Release flow
+
+1. Make changes
+2. Test the builder on a clean ISO
+3. Update `CHANGELOG.md`
+4. Tag a release
+5. Publish release notes using `releases/RELEASE_TEMPLATE.md`
+
+## Notes
+
+The GUI wizard uses built-in PowerShell and WPF so it stays portable on stock Windows installs.
+
+This project intentionally favors maintainability over aggressive stripping.
+
