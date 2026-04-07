@@ -514,11 +514,11 @@ $profiles = @{
           <StackPanel>
             <TextBlock FontSize="24" FontWeight="SemiBold" Text="Optional modules"/>
             <TextBlock Margin="0,4,0,0" Foreground="#6B7280" Text="Recommended options are selected automatically based on the profile you choose." TextWrapping="Wrap"/>
-            <CheckBox x:Name="InstallPackagesCheck" Margin="0,18,0,0" IsChecked="True" FontSize="15" Content="Install curated apps with winget"/>
-            <CheckBox x:Name="InstallRainmeterCheck" Margin="0,10,0,0" FontSize="15" Content="Install Rainmeter desktop module"/>
-            <CheckBox x:Name="LowLatencyCheck" Margin="0,10,0,0" FontSize="15" Content="Apply advanced low-latency tuning"/>
-            <CheckBox x:Name="PrivacyCheck" Margin="0,10,0,0" FontSize="15" Content="Reduce privacy noise, tips, and consumer content"/>
-            <CheckBox x:Name="RgbLookCheck" Margin="0,10,0,0" FontSize="15" Content="Apply desktop styling and accent tweaks"/>
+            <CheckBox x:Name="InstallPackagesCheck" Margin="0,18,0,0" IsChecked="True" FontSize="15" Foreground="#111827" Content="Install curated apps with winget"/>
+            <CheckBox x:Name="InstallRainmeterCheck" Margin="0,12,0,0" FontSize="15" Foreground="#111827" Content="Install Rainmeter desktop module"/>
+            <CheckBox x:Name="LowLatencyCheck" Margin="0,12,0,0" FontSize="15" Foreground="#111827" Content="Apply advanced low-latency tuning"/>
+            <CheckBox x:Name="PrivacyCheck" Margin="0,12,0,0" FontSize="15" Foreground="#111827" Content="Reduce privacy noise, tips, and consumer content"/>
+            <CheckBox x:Name="RgbLookCheck" Margin="0,12,0,0" FontSize="15" Foreground="#111827" Content="Apply desktop styling and accent tweaks"/>
             <TextBlock Margin="0,16,0,0" Foreground="#6B7280" Text="Apps and Rainmeter require internet access. Advanced low-latency tuning is more aggressive than the recommended defaults." TextWrapping="Wrap"/>
           </StackPanel>
         </Border>
