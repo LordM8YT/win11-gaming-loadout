@@ -12,6 +12,7 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 - A safer alternative to ultra-stripped builds
 - A first-login WPF wizard with curated profiles
 - Optional Rainmeter desktop modules for selected profiles
+- Local account creation through generated unattended setup
 - A gaming-focused setup flow for fresh installs
 
 ## What it is not

@@ -5,6 +5,12 @@ param(
 
     [int]$EditionIndex,
 
+    [string]$ComputerName = "GAMINGLAB-PC",
+
+    [string]$LocalUsername = "gamer",
+
+    [string]$LocalPassword,
+
     [string]$WorkingRoot,
 
     [string]$OutputRoot,
@@ -308,14 +314,63 @@ function Inject-Payload {
     }
 }
 
+function Escape-XmlValue {
+    param([string]$Value)
+
+    if ($null -eq $Value) {
+        return ""
+    }
+
+    return [System.Security.SecurityElement]::Escape($Value)
+}
+
 function Write-Autounattend {
-    param([string]$DestinationPath)
+    param(
+        [string]$DestinationPath,
+        [string]$ComputerName,
+        [string]$LocalUsername,
+        [string]$LocalPassword
+    )
 
     Write-Step "Genererer autounattend.xml"
 
+    $safeComputerName = Escape-XmlValue -Value $ComputerName
+    $safeLocalUsername = Escape-XmlValue -Value $LocalUsername
+    $hideOnlineAccountScreens = if ([string]::IsNullOrWhiteSpace($LocalUsername)) { "false" } else { "true" }
+
+    $localAccountBlock = ""
+    if (-not [string]::IsNullOrWhiteSpace($LocalUsername)) {
+        $passwordBlock = ""
+        if (-not [string]::IsNullOrWhiteSpace($LocalPassword)) {
+            $safePassword = Escape-XmlValue -Value $LocalPassword
+            $passwordBlock = @"
+          <Password>
+            <Value>$safePassword</Value>
+            <PlainText>true</PlainText>
+          </Password>
+"@
+        }
+
+        $localAccountBlock = @"
+      <RegisteredOrganization>Gaming Lab</RegisteredOrganization>
+      <RegisteredOwner>$safeLocalUsername</RegisteredOwner>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            $passwordBlock
+            <Description>Gaming Lab local account</Description>
+            <DisplayName>$safeLocalUsername</DisplayName>
+            <Group>Administrators</Group>
+            <Name>$safeLocalUsername</Name>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+"@
+    }
+
     $xml = @"
 <?xml version="1.0" encoding="utf-8"?>
-<unattend xmlns="urn:schemas-microsoft-com:unattend">
+<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
   <settings pass="oobeSystem">
     <component name="Microsoft-Windows-International-Core" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <InputLocale>0414:00000414</InputLocale>
@@ -324,13 +379,15 @@ function Write-Autounattend {
       <UserLocale>nb-NO</UserLocale>
     </component>
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <ComputerName>$safeComputerName</ComputerName>
       <TimeZone>W. Europe Standard Time</TimeZone>
       <OOBE>
         <HideEULAPage>false</HideEULAPage>
-        <HideOnlineAccountScreens>false</HideOnlineAccountScreens>
+        <HideOnlineAccountScreens>$hideOnlineAccountScreens</HideOnlineAccountScreens>
         <HideWirelessSetupInOOBE>false</HideWirelessSetupInOOBE>
         <ProtectYourPC>3</ProtectYourPC>
       </OOBE>
+$localAccountBlock
     </component>
   </settings>
 </unattend>
@@ -408,7 +465,7 @@ try {
     Write-Step "Lagrer endringer"
     Dismount-WindowsImage -Path $mountDir -Save | Out-Null
 
-    Write-Autounattend -DestinationPath (Join-Path $isoRoot "autounattend.xml")
+    Write-Autounattend -DestinationPath (Join-Path $isoRoot "autounattend.xml") -ComputerName $ComputerName -LocalUsername $LocalUsername -LocalPassword $LocalPassword
 
     $outputIso = Join-Path $OutputRoot $IsoName
     Build-IsoIfPossible -IsoRoot $isoRoot -OutputIso $outputIso
