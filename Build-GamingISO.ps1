@@ -132,6 +132,17 @@ function Get-InstallImagePath {
     throw "Fant ikke install.wim eller install.esd i ISO-strukturen."
 }
 
+function Get-BootImagePath {
+    param([string]$IsoRoot)
+
+    $bootWim = Join-Path $IsoRoot "sources\boot.wim"
+    if (Test-Path -LiteralPath $bootWim) {
+        return $bootWim
+    }
+
+    throw "Fant ikke boot.wim i ISO-strukturen."
+}
+
 function Show-EditionsAndExit {
     param([string]$ImagePath)
 
@@ -314,6 +325,48 @@ function Inject-Payload {
     }
 }
 
+function Customize-BootImage {
+    param(
+        [Parameter(Mandatory = $true)][string]$IsoRoot,
+        [Parameter(Mandatory = $true)][string]$WorkingRoot,
+        [Parameter(Mandatory = $true)][string]$PayloadDir
+    )
+
+    $bootImage = Get-BootImagePath -IsoRoot $IsoRoot
+    $bootMountDir = Join-Path $WorkingRoot "boot-mount"
+    $bootPayloadDir = Join-Path $PayloadDir "WinPE"
+
+    if (-not (Test-Path -LiteralPath $bootPayloadDir)) {
+        return
+    }
+
+    Remove-IfExists -LiteralPath $bootMountDir
+    New-Item -ItemType Directory -Path $bootMountDir -Force | Out-Null
+
+    try {
+        Write-Step "Monterer WinPE image (boot.wim index 2)"
+        Mount-WindowsImage -ImagePath $bootImage -Index 2 -Path $bootMountDir | Out-Null
+
+        $system32 = Join-Path $bootMountDir "Windows\System32"
+        New-Item -ItemType Directory -Path $system32 -Force | Out-Null
+
+        Copy-Item -LiteralPath (Join-Path $bootPayloadDir "startnet.cmd") -Destination (Join-Path $system32 "startnet.cmd") -Force
+        Copy-Item -LiteralPath (Join-Path $bootPayloadDir "Launch-GamingLab.cmd") -Destination (Join-Path $system32 "Launch-GamingLab.cmd") -Force
+
+        Write-Step "Lagrer WinPE endringer"
+        Dismount-WindowsImage -Path $bootMountDir -Save | Out-Null
+    }
+    catch {
+        try {
+            Dismount-WindowsImage -Path $bootMountDir -Discard | Out-Null
+        }
+        catch {
+        }
+
+        throw
+    }
+}
+
 function Escape-XmlValue {
     param([string]$Value)
 
@@ -478,6 +531,8 @@ try {
     $drive = "$($volume.DriveLetter):"
 
     Copy-IsoContents -SourceDrive $drive -Destination $isoRoot
+
+    Customize-BootImage -IsoRoot $isoRoot -WorkingRoot $WorkingRoot -PayloadDir $scriptPayloadDir
 
     $installImage = Get-InstallImagePath -IsoRoot $isoRoot
     if (Test-Path -LiteralPath $installImage) {

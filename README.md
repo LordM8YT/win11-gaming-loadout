@@ -15,6 +15,7 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 - Local account creation through generated unattended setup
 - More aggressive OOBE suppression to reduce Microsoft account prompts and setup noise
 - First-logon handoff driven by unattended setup, with SetupComplete fallback
+- Custom WinPE launcher that starts before the stock Windows setup UI
 - A gaming-focused setup flow for fresh installs
 
 ## What it is not
@@ -34,13 +35,14 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 ## Included flow
 
 1. Copy the ISO contents into a writable workspace
-2. Mount `install.wim`
-3. Remove selected provisioned apps
-4. Apply offline registry tweaks
-5. Inject `SetupComplete.cmd`
-6. Inject the first-login GUI wizard
-7. Write `autounattend.xml`
-8. Build a new ISO if `oscdimg.exe` is available
+2. Mount `boot.wim` and inject a custom WinPE launcher
+3. Mount `install.wim`
+4. Remove selected provisioned apps
+5. Apply offline registry tweaks
+6. Inject `SetupComplete.cmd`
+7. Inject the first-login GUI wizard
+8. Write `autounattend.xml`
+9. Build a new ISO if `oscdimg.exe` is available
 
 ## Safety goals
 
