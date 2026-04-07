@@ -35,6 +35,28 @@ function Write-Step {
     Write-Host "==> $Message" -ForegroundColor Cyan
 }
 
+function Find-Oscdimg {
+    $command = Get-Command oscdimg.exe -ErrorAction SilentlyContinue
+    if ($command) {
+        return $command.Source
+    }
+
+    $candidates = @(
+        "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\amd64\Oscdimg\oscdimg.exe",
+        "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\x86\Oscdimg\oscdimg.exe",
+        "C:\ADK\Deployment Tools\amd64\Oscdimg\oscdimg.exe",
+        "C:\ADK\Deployment Tools\x86\Oscdimg\oscdimg.exe"
+    )
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) {
+            return $candidate
+        }
+    }
+
+    return $null
+}
+
 function Test-Administrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($identity)
@@ -278,17 +300,17 @@ function Build-IsoIfPossible {
         [string]$OutputIso
     )
 
-    $oscdimg = Get-Command oscdimg.exe -ErrorAction SilentlyContinue
+    $oscdimg = Find-Oscdimg
     if (-not $oscdimg) {
         Write-Host ""
-        Write-Host "oscdimg.exe ble ikke funnet. ISO-strukturen er klar i: $IsoRoot" -ForegroundColor Yellow
+        Write-Host "oscdimg.exe ble ikke funnet i PATH eller vanlige ADK-mapper. ISO-strukturen er klar i: $IsoRoot" -ForegroundColor Yellow
         return
     }
 
     Write-Step "Bygger ny ISO"
 
     $bootData = "2#p0,e,b$IsoRoot\boot\etfsboot.com#pEF,e,b$IsoRoot\efi\microsoft\boot\efisys.bin"
-    & $oscdimg.Source -m -o -u2 -udfver102 -bootdata:$bootData $IsoRoot $OutputIso
+    & $oscdimg -m -o -u2 -udfver102 -bootdata:$bootData $IsoRoot $OutputIso
 }
 
 if (-not (Test-Administrator)) {
