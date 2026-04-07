@@ -138,6 +138,31 @@ function Show-EditionsAndExit {
     Write-Host "Kjør scriptet på nytt med -EditionIndex <nummer>." -ForegroundColor Yellow
 }
 
+function Invoke-RegExe {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [switch]$IgnoreErrors
+    )
+
+    $output = & reg.exe @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+
+    if ($exitCode -ne 0) {
+        if ($IgnoreErrors) {
+            return $false
+        }
+
+        $message = ($output | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($message)) {
+            $message = "reg.exe feilet med kode $exitCode."
+        }
+
+        throw $message
+    }
+
+    return $true
+}
+
 function Apply-OfflineRegistryTweaks {
     param([string]$MountDir)
 
@@ -146,29 +171,49 @@ function Apply-OfflineRegistryTweaks {
     $softwareHive = Join-Path $MountDir "Windows\System32\Config\SOFTWARE"
     $defaultHive = Join-Path $MountDir "Users\Default\NTUSER.DAT"
 
-    reg load HKLM\GL_SOFTWARE $softwareHive | Out-Null
-    reg load HKU\GL_DEFAULT $defaultHive | Out-Null
+    $softwareLoaded = $false
+    $defaultLoaded = $false
+
+    if (-not (Test-Path -LiteralPath $softwareHive) -or -not (Test-Path -LiteralPath $defaultHive)) {
+        Write-Host "Advarsel: Offline registry-hiver ble ikke funnet. Hopper over offline registry-tweaks." -ForegroundColor Yellow
+        return
+    }
+
+    Invoke-RegExe -Arguments @("unload", "HKLM\GL_SOFTWARE") -IgnoreErrors | Out-Null
+    Invoke-RegExe -Arguments @("unload", "HKU\GL_DEFAULT") -IgnoreErrors | Out-Null
 
     try {
-        reg add "HKLM\GL_SOFTWARE\Policies\Microsoft\Dsh" /v AllowNewsAndInterests /t REG_DWORD /d 0 /f | Out-Null
-        reg add "HKLM\GL_SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v DisableEdgeDesktopShortcutCreation /t REG_DWORD /d 1 /f | Out-Null
-        reg add "HKLM\GL_SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR" /v value /t REG_DWORD /d 1 /f | Out-Null
-        reg add "HKLM\GL_SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 4294967295 /f | Out-Null
-        reg add "HKLM\GL_SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 10 /f | Out-Null
-        reg add "HKLM\GL_SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsConsumerFeatures /t REG_DWORD /d 1 /f | Out-Null
+        $softwareLoaded = Invoke-RegExe -Arguments @("load", "HKLM\GL_SOFTWARE", $softwareHive) -IgnoreErrors
+        $defaultLoaded = Invoke-RegExe -Arguments @("load", "HKU\GL_DEFAULT", $defaultHive) -IgnoreErrors
 
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\GameBar" /v AllowAutoGameMode /t REG_DWORD /d 1 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\GameBar" /v AutoGameModeEnabled /t REG_DWORD /d 1 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v AppsUseLightTheme /t REG_DWORD /d 0 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v SystemUsesLightTheme /t REG_DWORD /d 0 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarMn /t REG_DWORD /d 0 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f | Out-Null
-        reg add "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 0 /f | Out-Null
+        if (-not $softwareLoaded -or -not $defaultLoaded) {
+            Write-Host "Advarsel: Kunne ikke laste en eller flere offline registry-hiver. Hopper over offline registry-tweaks." -ForegroundColor Yellow
+            return
+        }
+
+        Invoke-RegExe -Arguments @("add", "HKLM\GL_SOFTWARE\Policies\Microsoft\Dsh", "/v", "AllowNewsAndInterests", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKLM\GL_SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer", "/v", "DisableEdgeDesktopShortcutCreation", "/t", "REG_DWORD", "/d", "1", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKLM\GL_SOFTWARE\Microsoft\PolicyManager\default\ApplicationManagement\AllowGameDVR", "/v", "value", "/t", "REG_DWORD", "/d", "1", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKLM\GL_SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "/v", "NetworkThrottlingIndex", "/t", "REG_DWORD", "/d", "4294967295", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKLM\GL_SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile", "/v", "SystemResponsiveness", "/t", "REG_DWORD", "/d", "10", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKLM\GL_SOFTWARE\Policies\Microsoft\Windows\CloudContent", "/v", "DisableWindowsConsumerFeatures", "/t", "REG_DWORD", "/d", "1", "/f") | Out-Null
+
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\GameBar", "/v", "AllowAutoGameMode", "/t", "REG_DWORD", "/d", "1", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\GameBar", "/v", "AutoGameModeEnabled", "/t", "REG_DWORD", "/d", "1", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "/v", "AppsUseLightTheme", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "/v", "SystemUsesLightTheme", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "/v", "HideFileExt", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "/v", "TaskbarMn", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "/v", "TaskbarDa", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
+        Invoke-RegExe -Arguments @("add", "HKU\GL_DEFAULT\Software\Microsoft\Windows\CurrentVersion\Search", "/v", "SearchboxTaskbarMode", "/t", "REG_DWORD", "/d", "0", "/f") | Out-Null
     }
     finally {
-        reg unload HKLM\GL_SOFTWARE | Out-Null
-        reg unload HKU\GL_DEFAULT | Out-Null
+        if ($softwareLoaded) {
+            Invoke-RegExe -Arguments @("unload", "HKLM\GL_SOFTWARE") -IgnoreErrors | Out-Null
+        }
+        if ($defaultLoaded) {
+            Invoke-RegExe -Arguments @("unload", "HKU\GL_DEFAULT") -IgnoreErrors | Out-Null
+        }
     }
 }
 
