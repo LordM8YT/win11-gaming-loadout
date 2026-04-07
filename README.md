@@ -13,6 +13,7 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 - A first-login WPF wizard with curated profiles
 - Optional Rainmeter desktop modules for selected profiles
 - Local account creation through generated unattended setup
+- More aggressive OOBE suppression to reduce Microsoft account prompts and setup noise
 - A gaming-focused setup flow for fresh installs
 
 ## What it is not

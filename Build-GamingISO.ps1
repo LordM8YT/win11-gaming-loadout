@@ -337,10 +337,12 @@ function Write-Autounattend {
     $safeComputerName = Escape-XmlValue -Value $ComputerName
     $safeLocalUsername = Escape-XmlValue -Value $LocalUsername
     $hideOnlineAccountScreens = if ([string]::IsNullOrWhiteSpace($LocalUsername)) { "false" } else { "true" }
+    $autoLogonBlock = ""
 
     $localAccountBlock = ""
     if (-not [string]::IsNullOrWhiteSpace($LocalUsername)) {
         $passwordBlock = ""
+        $autoLogonPasswordBlock = ""
         if (-not [string]::IsNullOrWhiteSpace($LocalPassword)) {
             $safePassword = Escape-XmlValue -Value $LocalPassword
             $passwordBlock = @"
@@ -348,6 +350,12 @@ function Write-Autounattend {
             <Value>$safePassword</Value>
             <PlainText>true</PlainText>
           </Password>
+"@
+            $autoLogonPasswordBlock = @"
+        <Password>
+          <Value>$safePassword</Value>
+          <PlainText>true</PlainText>
+        </Password>
 "@
         }
 
@@ -366,6 +374,15 @@ function Write-Autounattend {
         </LocalAccounts>
       </UserAccounts>
 "@
+
+        $autoLogonBlock = @"
+      <AutoLogon>
+$autoLogonPasswordBlock
+        <Enabled>true</Enabled>
+        <LogonCount>1</LogonCount>
+        <Username>$safeLocalUsername</Username>
+      </AutoLogon>
+"@
     }
 
     $xml = @"
@@ -381,11 +398,16 @@ function Write-Autounattend {
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <ComputerName>$safeComputerName</ComputerName>
       <TimeZone>W. Europe Standard Time</TimeZone>
+$autoLogonBlock
       <OOBE>
-        <HideEULAPage>false</HideEULAPage>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
         <HideOnlineAccountScreens>$hideOnlineAccountScreens</HideOnlineAccountScreens>
-        <HideWirelessSetupInOOBE>false</HideWirelessSetupInOOBE>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
         <ProtectYourPC>3</ProtectYourPC>
+        <SkipMachineOOBE>true</SkipMachineOOBE>
+        <SkipUserOOBE>true</SkipUserOOBE>
       </OOBE>
 $localAccountBlock
     </component>
