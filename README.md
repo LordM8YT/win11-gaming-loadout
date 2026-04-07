@@ -14,6 +14,7 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 - Optional Rainmeter desktop modules for selected profiles
 - Local account creation through generated unattended setup
 - More aggressive OOBE suppression to reduce Microsoft account prompts and setup noise
+- First-logon handoff driven by unattended setup, with SetupComplete fallback
 - A gaming-focused setup flow for fresh installs
 
 ## What it is not

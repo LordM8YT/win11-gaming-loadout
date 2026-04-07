@@ -338,6 +338,7 @@ function Write-Autounattend {
     $safeLocalUsername = Escape-XmlValue -Value $LocalUsername
     $hideOnlineAccountScreens = if ([string]::IsNullOrWhiteSpace($LocalUsername)) { "false" } else { "true" }
     $autoLogonBlock = ""
+    $firstLogonCommandsBlock = ""
 
     $localAccountBlock = ""
     if (-not [string]::IsNullOrWhiteSpace($LocalUsername)) {
@@ -383,6 +384,16 @@ $autoLogonPasswordBlock
         <Username>$safeLocalUsername</Username>
       </AutoLogon>
 "@
+
+        $firstLogonCommandsBlock = @"
+      <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <Description>Gaming Lab First Logon</Description>
+          <CommandLine>powershell.exe -ExecutionPolicy Bypass -NoProfile -File "%WINDIR%\GamingLab\FirstLogon.ps1"</CommandLine>
+        </SynchronousCommand>
+      </FirstLogonCommands>
+"@
     }
 
     $xml = @"
@@ -409,6 +420,7 @@ $autoLogonBlock
         <SkipMachineOOBE>true</SkipMachineOOBE>
         <SkipUserOOBE>true</SkipUserOOBE>
       </OOBE>
+$firstLogonCommandsBlock
 $localAccountBlock
     </component>
   </settings>
