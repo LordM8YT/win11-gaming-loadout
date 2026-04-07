@@ -11,6 +11,7 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 - A local Windows 11 ISO customization workflow
 - A safer alternative to ultra-stripped builds
 - A first-login WPF wizard with curated profiles
+- Optional Rainmeter desktop modules for selected profiles
 - A gaming-focused setup flow for fresh installs
 
 ## What it is not
@@ -23,9 +24,9 @@ It takes a clean Windows 11 ISO, removes some bundled noise, applies safer gamin
 ## Current profiles
 
 - `Competitive`: cleaner desktop, lower background noise, FPS-first defaults
-- `FiveM`: roleplay-friendly setup with a cyber look and core gaming apps
-- `Streamer`: gaming plus OBS-style creator flow
-- `Creator`: balanced gaming, coding, and media setup
+- `FiveM`: roleplay-friendly setup with a cyber look, core gaming apps, and an optional Rainmeter module
+- `Streamer`: gaming plus OBS-style creator flow with an optional Rainmeter module
+- `Creator`: balanced gaming, coding, media setup, and an optional Rainmeter module
 
 ## Included flow
 
@@ -76,6 +77,7 @@ The first run lists available Windows editions. Then run it again with the editi
 - `Build-GamingISO.ps1`: main builder
 - `payload/SetupComplete.cmd`: post-setup launcher
 - `payload/FirstLogon.ps1`: WPF loadout wizard
+- `payload/RainmeterProfiles/*`: optional desktop skins per profile
 - `docs/preview.svg`: visual repo preview
 - `CHANGELOG.md`: release history
 - `releases/RELEASE_TEMPLATE.md`: release notes template
@@ -93,4 +95,3 @@ The first run lists available Windows editions. Then run it again with the editi
 The GUI wizard uses built-in PowerShell and WPF so it stays portable on stock Windows installs.
 
 This project intentionally favors maintainability over aggressive stripping.
-

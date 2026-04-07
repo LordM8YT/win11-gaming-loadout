@@ -228,12 +228,17 @@ function Inject-Payload {
 
     $setupScripts = Join-Path $MountDir "Windows\Setup\Scripts"
     $gamingLab = Join-Path $MountDir "Windows\GamingLab"
+    $rainmeterProfiles = Join-Path $PayloadDir "RainmeterProfiles"
 
     New-Item -ItemType Directory -Path $setupScripts -Force | Out-Null
     New-Item -ItemType Directory -Path $gamingLab -Force | Out-Null
 
     Copy-Item -LiteralPath (Join-Path $PayloadDir "SetupComplete.cmd") -Destination (Join-Path $setupScripts "SetupComplete.cmd") -Force
     Copy-Item -LiteralPath (Join-Path $PayloadDir "FirstLogon.ps1") -Destination (Join-Path $gamingLab "FirstLogon.ps1") -Force
+
+    if (Test-Path -LiteralPath $rainmeterProfiles) {
+        Copy-Item -LiteralPath $rainmeterProfiles -Destination (Join-Path $gamingLab "RainmeterProfiles") -Recurse -Force
+    }
 }
 
 function Write-Autounattend {

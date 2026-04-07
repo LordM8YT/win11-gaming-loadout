@@ -222,6 +222,90 @@ function Install-WingetPackages {
     }
 }
 
+function Install-WingetPackage {
+    param(
+        [Parameter(Mandatory = $true)][string]$PackageId,
+        [Parameter(Mandatory = $true)][System.Windows.Controls.TextBox]$OutputBox,
+        [string]$DisplayName = $PackageId
+    )
+
+    $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+    if (-not $winget) {
+        Add-Status -OutputBox $OutputBox -Message "Winget ble ikke funnet. Hopper over $DisplayName."
+        return $false
+    }
+
+    Add-Status -OutputBox $OutputBox -Message "Installerer $DisplayName"
+    & $winget.Source install --id $PackageId --exact --accept-package-agreements --accept-source-agreements --silent
+    if ($LASTEXITCODE -eq 0) {
+        Add-Status -OutputBox $OutputBox -Message "$DisplayName installert."
+        return $true
+    }
+
+    Add-Status -OutputBox $OutputBox -Message "$DisplayName kunne ikke installeres automatisk."
+    return $false
+}
+
+function Get-RainmeterExecutablePath {
+    $candidates = @(
+        (Join-Path ${env:ProgramFiles} "Rainmeter\Rainmeter.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "Rainmeter\Rainmeter.exe")
+    )
+
+    foreach ($candidate in $candidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            return $candidate
+        }
+    }
+
+    $command = Get-Command Rainmeter.exe -ErrorAction SilentlyContinue
+    if ($command) {
+        return $command.Source
+    }
+
+    return $null
+}
+
+function Install-RainmeterProfile {
+    param(
+        [hashtable]$Profile,
+        [System.Windows.Controls.TextBox]$OutputBox
+    )
+
+    if (-not $Profile.RainmeterEnabled) {
+        Add-Status -OutputBox $OutputBox -Message "Rainmeter er ikke aktivert for denne profilen."
+        return
+    }
+
+    if (-not (Install-WingetPackage -PackageId "Rainmeter.Rainmeter" -OutputBox $OutputBox -DisplayName "Rainmeter")) {
+        return
+    }
+
+    $sourceRoot = Join-Path $PSScriptRoot ("RainmeterProfiles\{0}" -f $Profile.RainmeterProfile)
+    if (-not (Test-Path -LiteralPath $sourceRoot)) {
+        Add-Status -OutputBox $OutputBox -Message "Fant ikke Rainmeter-profilen $($Profile.RainmeterProfile)."
+        return
+    }
+
+    $documentsPath = [Environment]::GetFolderPath("MyDocuments")
+    $skinsRoot = Join-Path $documentsPath ("Rainmeter\Skins\GamingLab\{0}" -f $Profile.RainmeterProfile)
+    New-Item -ItemType Directory -Path $skinsRoot -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $sourceRoot "*") -Destination $skinsRoot -Recurse -Force
+    Add-Status -OutputBox $OutputBox -Message "Rainmeter-skin kopiert til Documents\Rainmeter\Skins\GamingLab\$($Profile.RainmeterProfile)"
+
+    $rainmeterExe = Get-RainmeterExecutablePath
+    if (-not $rainmeterExe) {
+        Add-Status -OutputBox $OutputBox -Message "Fant ikke Rainmeter.exe etter installasjon."
+        return
+    }
+
+    Start-Process -FilePath $rainmeterExe | Out-Null
+    Start-Sleep -Seconds 2
+    Start-Process -FilePath $rainmeterExe -ArgumentList "!ActivateConfig", "GamingLab\$($Profile.RainmeterProfile)", "$($Profile.RainmeterProfile).ini" | Out-Null
+    Start-Process -FilePath $rainmeterExe -ArgumentList "!RefreshApp" | Out-Null
+    Add-Status -OutputBox $OutputBox -Message "Rainmeter-profil aktivert: $($Profile.RainmeterProfile)"
+}
+
 function Invoke-Step {
     param(
         [Parameter(Mandatory = $true)][scriptblock]$Action,
@@ -251,6 +335,8 @@ $profiles = @{
         LowLatency = $true
         Privacy = $true
         RgbLook = $false
+        RainmeterEnabled = $false
+        RainmeterProfile = "Competitive"
         DisableStartupNoise = $true
         ReduceVisualEffects = $true
         RemoveUserApps = @(
@@ -274,6 +360,8 @@ $profiles = @{
         LowLatency = $true
         Privacy = $true
         RgbLook = $true
+        RainmeterEnabled = $true
+        RainmeterProfile = "FiveM"
         DisableStartupNoise = $true
         ReduceVisualEffects = $true
         RemoveUserApps = @(
@@ -295,6 +383,8 @@ $profiles = @{
         LowLatency = $false
         Privacy = $true
         RgbLook = $true
+        RainmeterEnabled = $true
+        RainmeterProfile = "Streamer"
         DisableStartupNoise = $true
         ReduceVisualEffects = $true
         RemoveUserApps = @(
@@ -319,6 +409,8 @@ $profiles = @{
         LowLatency = $false
         Privacy = $false
         RgbLook = $true
+        RainmeterEnabled = $true
+        RainmeterProfile = "Creator"
         DisableStartupNoise = $false
         ReduceVisualEffects = $false
         RemoveUserApps = @(
@@ -414,6 +506,7 @@ $profiles = @{
           <StackPanel>
             <TextBlock FontSize="22" FontWeight="SemiBold" Text="Ekstra valg"/>
             <CheckBox x:Name="InstallPackagesCheck" Margin="0,16,0,0" IsChecked="True" FontSize="15" Content="Installer kuraterte apper med winget"/>
+            <CheckBox x:Name="InstallRainmeterCheck" Margin="0,10,0,0" FontSize="15" Content="Installer Rainmeter desktop-modul"/>
             <CheckBox x:Name="LowLatencyCheck" Margin="0,10,0,0" FontSize="15" Content="Low-latency tuning"/>
             <CheckBox x:Name="PrivacyCheck" Margin="0,10,0,0" FontSize="15" Content="Mer privacy, mindre Windows-stoy"/>
             <CheckBox x:Name="RgbLookCheck" Margin="0,10,0,0" FontSize="15" Content="Cyber gaming-look"/>
@@ -457,6 +550,7 @@ $profileFiveM = $window.FindName("ProfileFiveM")
 $profileStreamer = $window.FindName("ProfileStreamer")
 $profileCreator = $window.FindName("ProfileCreator")
 $installPackagesCheck = $window.FindName("InstallPackagesCheck")
+$installRainmeterCheck = $window.FindName("InstallRainmeterCheck")
 $lowLatencyCheck = $window.FindName("LowLatencyCheck")
 $privacyCheck = $window.FindName("PrivacyCheck")
 $rgbLookCheck = $window.FindName("RgbLookCheck")
@@ -473,6 +567,7 @@ function Get-SelectedProfileKey {
 
 function Sync-OptionsFromProfile {
     $selectedProfile = $profiles[(Get-SelectedProfileKey)]
+    $installRainmeterCheck.IsChecked = $selectedProfile.RainmeterEnabled
     $lowLatencyCheck.IsChecked = $selectedProfile.LowLatency
     $privacyCheck.IsChecked = $selectedProfile.Privacy
     $rgbLookCheck.IsChecked = $selectedProfile.RgbLook
@@ -517,6 +612,15 @@ $applyButton.Add_Click({
         }
         else {
             Add-Status -OutputBox $outputBox -Message "Appinstallasjon ble hoppet over."
+        }
+
+        if ([bool]$installRainmeterCheck.IsChecked) {
+            Invoke-Step -OutputBox $outputBox -StepName "Rainmeter" -Action {
+                Install-RainmeterProfile -Profile $selectedProfile -OutputBox $outputBox
+            }
+        }
+        else {
+            Add-Status -OutputBox $outputBox -Message "Rainmeter-modulen ble hoppet over."
         }
 
         Add-Status -OutputBox $outputBox -Message "Ferdig. Explorer restartes for a laste inn noen av endringene."
