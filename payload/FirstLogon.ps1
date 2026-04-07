@@ -423,43 +423,44 @@ $profiles = @{
 [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gaming Lab Loadout"
-        Width="1120"
-        Height="760"
+        Title="Gaming Lab Tweak Center"
+        Width="1180"
+        Height="800"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
-        Background="#0A0E14"
-        Foreground="#EAF2FF"
-        FontFamily="Segoe UI">
-  <Grid Margin="20">
+        Background="#F5F7FB"
+        Foreground="#111827"
+        FontFamily="Segoe UI Variable Display">
+  <Grid Margin="24">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <Border Grid.Row="0" CornerRadius="24" Padding="24" Background="#101826" BorderBrush="#1CE0B6" BorderThickness="1">
+    <Border Grid.Row="0" CornerRadius="28" Padding="28" Background="#FFFFFF" BorderBrush="#D7DFEA" BorderThickness="1">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel>
-          <TextBlock FontSize="34" FontWeight="Bold" Text="Windows 11 Gaming Lab"/>
-          <TextBlock Margin="0,8,0,0" FontSize="15" Foreground="#8EA6C9" Text="Velg en loadout og la wizard-en gjore resten. Dette er den Windows-varianten av et kuratert gaming-oppsett." TextWrapping="Wrap"/>
+          <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#2563EB" Text="GAMING LAB"/>
+          <TextBlock Margin="0,6,0,0" FontSize="36" FontWeight="SemiBold" Text="Tweak Center"/>
+          <TextBlock Margin="0,8,0,0" FontSize="15" Foreground="#4B5563" Text="Apply a recommended Windows 11 profile, then fine-tune privacy, visuals, apps, and optional desktop modules." TextWrapping="Wrap"/>
         </StackPanel>
-        <Border Grid.Column="1" Background="#151F31" CornerRadius="18" Padding="18" BorderBrush="#3CFFCC" BorderThickness="1">
+        <Border Grid.Column="1" Background="#F8FAFC" CornerRadius="22" Padding="18" BorderBrush="#D7DFEA" BorderThickness="1">
           <StackPanel>
-            <TextBlock FontSize="12" Foreground="#8EA6C9" Text="STATUS"/>
-            <TextBlock FontSize="18" FontWeight="SemiBold" Text="Fresh Install Wizard"/>
-            <TextBlock Margin="0,4,0,0" Foreground="#8EA6C9" Text="Profiler, tweaks og appvalg"/>
+            <TextBlock FontSize="12" Foreground="#64748B" Text="MODE"/>
+            <TextBlock FontSize="18" FontWeight="SemiBold" Text="Windows 11 Companion"/>
+            <TextBlock Margin="0,4,0,0" Foreground="#64748B" Text="Profiles, tweaks, desktop, and apps"/>
           </StackPanel>
         </Border>
       </Grid>
     </Border>
     <Grid Grid.Row="1" Margin="0,18,0,18">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="2.1*"/>
-        <ColumnDefinition Width="1.2*"/>
+        <ColumnDefinition Width="2.2*"/>
+        <ColumnDefinition Width="1.15*"/>
       </Grid.ColumnDefinitions>
       <Grid Grid.Column="0" Margin="0,0,18,0">
         <Grid.RowDefinitions>
@@ -467,61 +468,70 @@ $profiles = @{
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock FontSize="22" FontWeight="SemiBold" Text="Velg profil"/>
+        <StackPanel>
+          <TextBlock FontSize="24" FontWeight="SemiBold" Text="Choose a profile"/>
+          <TextBlock Margin="0,4,0,0" Foreground="#6B7280" Text="Recommended presets are designed to feel close to a clean, well-tuned Windows 11 install."/>
+        </StackPanel>
         <UniformGrid Grid.Row="1" Margin="0,14,0,18" Columns="2">
           <RadioButton x:Name="ProfileCompetitive" GroupName="Profile" Margin="0,0,12,12" IsChecked="True">
-            <Border CornerRadius="20" Padding="18" Background="#111B2D" BorderBrush="#263B5A" BorderThickness="1">
+            <Border CornerRadius="24" Padding="20" Background="#FFFFFF" BorderBrush="#D6DFEA" BorderThickness="1">
               <StackPanel>
-                <TextBlock FontSize="21" FontWeight="Bold" Text="Competitive"/>
-                <TextBlock Margin="0,8,0,0" Foreground="#8EA6C9" Text="FPS forst. Minimal distraksjon. Klar for ranked." TextWrapping="Wrap"/>
+                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#2563EB" Text="RECOMMENDED"/>
+                <TextBlock Margin="0,6,0,0" FontSize="22" FontWeight="SemiBold" Text="Competitive"/>
+                <TextBlock Margin="0,8,0,0" Foreground="#4B5563" Text="FPS first, lower background noise, fewer distractions, cleaner desktop defaults." TextWrapping="Wrap"/>
               </StackPanel>
             </Border>
           </RadioButton>
           <RadioButton x:Name="ProfileFiveM" GroupName="Profile" Margin="0,0,0,12">
-            <Border CornerRadius="20" Padding="18" Background="#16172F" BorderBrush="#4A36FF" BorderThickness="1">
+            <Border CornerRadius="24" Padding="20" Background="#FFFFFF" BorderBrush="#D6DFEA" BorderThickness="1">
               <StackPanel>
-                <TextBlock FontSize="21" FontWeight="Bold" Text="FiveM"/>
-                <TextBlock Margin="0,8,0,0" Foreground="#A8A7D8" Text="Roleplay-rigg med Discord, Steam og cyber-look." TextWrapping="Wrap"/>
+                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#7C3AED" Text="PROFILE"/>
+                <TextBlock Margin="0,6,0,0" FontSize="22" FontWeight="SemiBold" Text="FiveM"/>
+                <TextBlock Margin="0,8,0,0" Foreground="#4B5563" Text="Roleplay-oriented setup with Discord, Steam, and optional desktop styling." TextWrapping="Wrap"/>
               </StackPanel>
             </Border>
           </RadioButton>
           <RadioButton x:Name="ProfileStreamer" GroupName="Profile" Margin="0,0,12,0">
-            <Border CornerRadius="20" Padding="18" Background="#161F1C" BorderBrush="#23D18B" BorderThickness="1">
+            <Border CornerRadius="24" Padding="20" Background="#FFFFFF" BorderBrush="#D6DFEA" BorderThickness="1">
               <StackPanel>
-                <TextBlock FontSize="21" FontWeight="Bold" Text="Streamer"/>
-                <TextBlock Margin="0,8,0,0" Foreground="#9BD7BD" Text="OBS, Discord og gaming med creator-flyt." TextWrapping="Wrap"/>
+                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#059669" Text="RECOMMENDED"/>
+                <TextBlock Margin="0,6,0,0" FontSize="22" FontWeight="SemiBold" Text="Streamer"/>
+                <TextBlock Margin="0,8,0,0" Foreground="#4B5563" Text="Balanced gaming and streaming defaults with OBS, Discord, and reduced desktop noise." TextWrapping="Wrap"/>
               </StackPanel>
             </Border>
           </RadioButton>
           <RadioButton x:Name="ProfileCreator" GroupName="Profile">
-            <Border CornerRadius="20" Padding="18" Background="#231915" BorderBrush="#FF8A3D" BorderThickness="1">
+            <Border CornerRadius="24" Padding="20" Background="#FFFFFF" BorderBrush="#D6DFEA" BorderThickness="1">
               <StackPanel>
-                <TextBlock FontSize="21" FontWeight="Bold" Text="Creator"/>
-                <TextBlock Margin="0,8,0,0" Foreground="#F2B487" Text="Gaming + kode + media i en mer allround profil." TextWrapping="Wrap"/>
+                <TextBlock FontSize="13" FontWeight="SemiBold" Foreground="#EA580C" Text="PROFILE"/>
+                <TextBlock Margin="0,6,0,0" FontSize="22" FontWeight="SemiBold" Text="Creator"/>
+                <TextBlock Margin="0,8,0,0" Foreground="#4B5563" Text="A broader setup for gaming, coding, media work, and day-to-day Windows usage." TextWrapping="Wrap"/>
               </StackPanel>
             </Border>
           </RadioButton>
         </UniformGrid>
-        <Border Grid.Row="2" Background="#0F1623" CornerRadius="20" Padding="20" BorderBrush="#22324A" BorderThickness="1">
+        <Border Grid.Row="2" Background="#FFFFFF" CornerRadius="24" Padding="22" BorderBrush="#D6DFEA" BorderThickness="1">
           <StackPanel>
-            <TextBlock FontSize="22" FontWeight="SemiBold" Text="Ekstra valg"/>
-            <CheckBox x:Name="InstallPackagesCheck" Margin="0,16,0,0" IsChecked="True" FontSize="15" Content="Installer kuraterte apper med winget"/>
-            <CheckBox x:Name="InstallRainmeterCheck" Margin="0,10,0,0" FontSize="15" Content="Installer Rainmeter desktop-modul"/>
-            <CheckBox x:Name="LowLatencyCheck" Margin="0,10,0,0" FontSize="15" Content="Low-latency tuning"/>
-            <CheckBox x:Name="PrivacyCheck" Margin="0,10,0,0" FontSize="15" Content="Mer privacy, mindre Windows-stoy"/>
-            <CheckBox x:Name="RgbLookCheck" Margin="0,10,0,0" FontSize="15" Content="Cyber gaming-look"/>
-            <TextBlock Margin="0,16,0,0" Foreground="#8EA6C9" Text="Appinstallasjon krever internett. Hvis winget ikke finnes hopper wizard-en bare over appdelen." TextWrapping="Wrap"/>
+            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Optional modules"/>
+            <TextBlock Margin="0,4,0,0" Foreground="#6B7280" Text="Recommended options are selected automatically based on the profile you choose." TextWrapping="Wrap"/>
+            <CheckBox x:Name="InstallPackagesCheck" Margin="0,18,0,0" IsChecked="True" FontSize="15" Content="Install curated apps with winget"/>
+            <CheckBox x:Name="InstallRainmeterCheck" Margin="0,10,0,0" FontSize="15" Content="Install Rainmeter desktop module"/>
+            <CheckBox x:Name="LowLatencyCheck" Margin="0,10,0,0" FontSize="15" Content="Apply advanced low-latency tuning"/>
+            <CheckBox x:Name="PrivacyCheck" Margin="0,10,0,0" FontSize="15" Content="Reduce privacy noise, tips, and consumer content"/>
+            <CheckBox x:Name="RgbLookCheck" Margin="0,10,0,0" FontSize="15" Content="Apply desktop styling and accent tweaks"/>
+            <TextBlock Margin="0,16,0,0" Foreground="#6B7280" Text="Apps and Rainmeter require internet access. Advanced low-latency tuning is more aggressive than the recommended defaults." TextWrapping="Wrap"/>
           </StackPanel>
         </Border>
       </Grid>
-      <Border Grid.Column="1" Background="#0F1623" CornerRadius="20" Padding="18" BorderBrush="#22324A" BorderThickness="1">
+      <Border Grid.Column="1" Background="#FFFFFF" CornerRadius="24" Padding="18" BorderBrush="#D6DFEA" BorderThickness="1">
         <DockPanel LastChildFill="True">
-          <TextBlock DockPanel.Dock="Top" FontSize="22" FontWeight="SemiBold" Text="Aktivitetslogg"/>
+          <TextBlock DockPanel.Dock="Top" FontSize="24" FontWeight="SemiBold" Text="Activity"/>
           <TextBox x:Name="OutputBox"
                    Margin="0,16,0,0"
-                   Background="#081018"
-                   Foreground="#D7E8FF"
-                   BorderThickness="0"
+                   Background="#F8FAFC"
+                   Foreground="#1F2937"
+                   BorderBrush="#E5E7EB"
+                   BorderThickness="1"
                    FontFamily="Consolas"
                    FontSize="13"
                    AcceptsReturn="True"
@@ -532,10 +542,10 @@ $profiles = @{
       </Border>
     </Grid>
     <DockPanel Grid.Row="2">
-      <TextBlock VerticalAlignment="Center" Foreground="#8EA6C9" Text="Tips: FiveM-profilen er et bra standardvalg for gaming + Discord + litt ekstra stil."/>
+      <TextBlock VerticalAlignment="Center" Foreground="#6B7280" Text="Tip: Streamer and Competitive are the safest starting points if you want a more official-feeling Windows 11 setup with less clutter." TextWrapping="Wrap"/>
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-        <Button x:Name="CloseButton" Width="130" Height="42" Margin="0,0,12,0" Content="Lukk" Background="#172233" Foreground="#EAF2FF" BorderBrush="#31455F"/>
-        <Button x:Name="ApplyButton" Width="220" Height="42" Content="Bygg loadout" Background="#1CE0B6" Foreground="#071117" BorderBrush="#1CE0B6" FontWeight="Bold"/>
+        <Button x:Name="CloseButton" Width="130" Height="42" Margin="0,0,12,0" Content="Close" Background="#FFFFFF" Foreground="#111827" BorderBrush="#D6DFEA"/>
+        <Button x:Name="ApplyButton" Width="230" Height="42" Content="Apply recommended setup" Background="#2563EB" Foreground="#FFFFFF" BorderBrush="#2563EB" FontWeight="SemiBold"/>
       </StackPanel>
     </DockPanel>
   </Grid>

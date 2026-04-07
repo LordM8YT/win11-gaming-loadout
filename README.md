@@ -66,6 +66,18 @@ cd "C:\Users\Patri\Desktop\win11-gaming-build"
 .\Build-GamingISO.ps1 -IsoPath "C:\Users\Patri\Downloads\Win11_25H2_Norwegian_x64_v2.iso"
 ```
 
+## Standalone tweak center
+
+You can also use the tweak UI on an already installed Windows 11 system without rebuilding an ISO:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+cd "C:\Users\Patri\Desktop\win11-gaming-build"
+.\Start-GamingLabTweakCenter.ps1
+```
+
+This launches the same tweak center used after first logon.
+
 The first run lists available Windows editions. Then run it again with the edition index you want:
 
 ```powershell
@@ -80,6 +92,7 @@ The first run lists available Windows editions. Then run it again with the editi
 ## Repo layout
 
 - `Build-GamingISO.ps1`: main builder
+- `Start-GamingLabTweakCenter.ps1`: standalone launcher for already installed Windows systems
 - `payload/SetupComplete.cmd`: post-setup launcher
 - `payload/FirstLogon.ps1`: WPF loadout wizard
 - `payload/RainmeterProfiles/*`: optional desktop skins per profile
